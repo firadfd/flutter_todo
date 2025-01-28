@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo/screen/todo_screen.dart';
+
 import 'cubit/todo_cubut.dart';
 import 'model/todo_model.dart';
 
@@ -14,12 +15,15 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TodoCubit(),
       child: MaterialApp(
-        home: TodoScreen(),
+        debugShowCheckedModeBanner: false,
+        home: SafeArea(child: TodoScreen()),
       ),
     );
   }

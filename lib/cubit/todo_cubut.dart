@@ -31,4 +31,5 @@ class TodoCubit extends Cubit<List<Todo>> {
     _todoBox.deleteAt(index);
     loadTodos();
   }
+
 }
