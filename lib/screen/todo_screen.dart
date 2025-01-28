@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:todo/bloc/todo_bloc.dart';
+import 'package:todo/bloc/todo_state.dart';
+
+import '../bloc/todo_event.dart';
 import '../cubit/todo_cubut.dart';
-import '../model/todo_model.dart';
+import '../widgets/ui_helper.dart';
 
 class TodoScreen extends StatelessWidget {
   const TodoScreen({super.key});
@@ -18,28 +22,35 @@ class TodoScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: BlocBuilder<TodoCubit, List<Todo>>(
-          builder: (context, todos) {
-            if (todos.isEmpty) {
-              return const Center(
-                child: Text("No note found"),
-              );
+        child: BlocBuilder<TodoBloc, TodoState>(
+          builder: (context, state) {
+            if (state is TodoLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is TodoLoaded) {
+              final todos = state.todos;
+              if (todos.isEmpty) {
+                return const Center(child: Text("No note found"));
+              } else {
+                return MasonryGridView.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 8.0,
+                  crossAxisSpacing: 8.0,
+                  itemCount: todos.length,
+                  itemBuilder: (context, index) {
+                    final todo = todos[index];
+                    return UiHelper.listItem(todo.title, todo.isCompleted,
+                        onCompleted: () {
+                      context.read<TodoBloc>().add(ToggleTodoStatus(index));
+                    }, onDelete: () {
+                      context.read<TodoBloc>().add(DeleteTodoAt(index));
+                    });
+                  },
+                );
+              }
+            } else if (state is TodoError) {
+              return Center(child: Text(state.message));
             } else {
-              return MasonryGridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 8.0,
-                crossAxisSpacing: 8.0,
-                itemCount: todos.length,
-                itemBuilder: (context, index) {
-                  final todo = todos[index];
-                  return UiHelper.listItem(todo.title, todo.isCompleted,
-                      onCompleted: () {
-                    context.read<TodoCubit>().toggleTodoStatus(index);
-                  }, onDelete: () {
-                    context.read<TodoCubit>().deleteTodoAt(index);
-                  });
-                },
-              );
+              return const Center(child: Text("Something went wrong"));
             }
           },
         ),
@@ -72,7 +83,7 @@ class TodoScreen extends StatelessWidget {
                     child: const Text('Add'),
                     onPressed: () {
                       if (controller.text.isNotEmpty) {
-                        context.read<TodoCubit>().addTodo(controller.text);
+                        context.read<TodoBloc>().add(AddTodo(controller.text));
                         controller.clear();
                         Navigator.pop(context);
                       }
@@ -83,65 +94,6 @@ class TodoScreen extends StatelessWidget {
             },
           );
         },
-      ),
-    );
-  }
-}
-
-class UiHelper {
-  static Widget listItem(
-    String title,
-    bool isCompleted, {
-    required VoidCallback onCompleted,
-    required VoidCallback onDelete,
-  }) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      color: isCompleted ? Colors.green.shade100 : Colors.red.shade100,
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  decoration: isCompleted
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                  color: Colors.black),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.check,
-                    color: isCompleted
-                        ? Colors.green.shade800
-                        : Colors.grey.shade600,
-                  ),
-                  onPressed: onCompleted,
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.delete,
-                    color: isCompleted
-                        ? Colors.green.shade800
-                        : Colors.grey.shade600,
-                  ),
-                  onPressed: onDelete,
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
