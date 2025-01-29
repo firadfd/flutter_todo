@@ -16,6 +16,16 @@ class AddTodo extends TodoEvent {
   List<Object?> get props => [title];
 }
 
+class UpdateTodo extends TodoEvent {
+  final String title;
+  final int index;
+
+  UpdateTodo(this.index, this.title);
+
+  @override
+  List<Object?> get props => [index, title];
+}
+
 class ToggleTodoStatus extends TodoEvent {
   final int index;
 
@@ -33,4 +43,3 @@ class DeleteTodoAt extends TodoEvent {
   @override
   List<Object?> get props => [index];
 }
-

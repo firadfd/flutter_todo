@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:hive/hive.dart';
+
 import '../model/todo_model.dart';
 import 'todo_event.dart';
 import 'todo_state.dart';
@@ -10,6 +11,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   TodoBloc(this._todoBox) : super(TodoInitial()) {
     on<LoadTodos>(_onLoadTodos);
     on<AddTodo>(_onAddTodo);
+    on<UpdateTodo>(_onUpdateTodo);
     on<ToggleTodoStatus>(_onToggleTodoStatus);
     on<DeleteTodoAt>(_onDeleteTodoAt);
 
@@ -36,11 +38,24 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     }
   }
 
+  void _onUpdateTodo(UpdateTodo event, Emitter<TodoState> emit) {
+    try {
+      final todo = _todoBox.getAt(event.index);
+      if (todo != null) {
+        _todoBox.putAt(event.index, Todo(title: event.title, isCompleted: todo.isCompleted));
+        add(LoadTodos());
+      }
+    } catch (e) {
+      emit(TodoError('Failed to update todo'));
+    }
+  }
+
   void _onToggleTodoStatus(ToggleTodoStatus event, Emitter<TodoState> emit) {
     try {
       final todo = _todoBox.getAt(event.index);
       if (todo != null) {
-        _todoBox.putAt(event.index, Todo(title: todo.title, isCompleted: !todo.isCompleted));
+        _todoBox.putAt(event.index,
+            Todo(title: todo.title, isCompleted: !todo.isCompleted));
         add(LoadTodos());
       }
     } catch (e) {

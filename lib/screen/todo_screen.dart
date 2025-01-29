@@ -3,9 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:todo/bloc/todo_bloc.dart';
 import 'package:todo/bloc/todo_state.dart';
-
 import '../bloc/todo_event.dart';
-import '../cubit/todo_cubut.dart';
 import '../widgets/ui_helper.dart';
 
 class TodoScreen extends StatelessWidget {
@@ -43,7 +41,43 @@ class TodoScreen extends StatelessWidget {
                       context.read<TodoBloc>().add(ToggleTodoStatus(index));
                     }, onDelete: () {
                       context.read<TodoBloc>().add(DeleteTodoAt(index));
-                    });
+                    }, onUpdate: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              TextEditingController updateTextController = TextEditingController(text: todo.title);
+                              return AlertDialog(
+                                title: const Text('Update Todo'),
+                                content: TextField(
+                                  controller: updateTextController,
+                                  minLines: 1,
+                                  maxLines: null,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  keyboardType: TextInputType.multiline,
+                                  decoration: const InputDecoration(hintText: 'Todo Title'),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: const Text('Cancel'),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: const Text('Update'),
+                                    onPressed: () {
+                                      if (updateTextController.text.isNotEmpty) {
+                                        context.read<TodoBloc>().add(UpdateTodo(index, updateTextController.text));
+                                        updateTextController.clear();
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        });
                   },
                 );
               }

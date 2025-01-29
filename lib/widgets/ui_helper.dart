@@ -6,6 +6,7 @@ class UiHelper {
       bool isCompleted, {
         required VoidCallback onCompleted,
         required VoidCallback onDelete,
+        required VoidCallback onUpdate,
       }) {
     return Card(
       elevation: 4,
@@ -49,6 +50,15 @@ class UiHelper {
                         : Colors.grey.shade600,
                   ),
                   onPressed: onDelete,
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    color: isCompleted
+                        ? Colors.green.shade800
+                        : Colors.grey.shade600,
+                  ),
+                  onPressed: onUpdate,
                 ),
               ],
             ),
