@@ -16,7 +16,7 @@ class TodoScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.greenAccent,
-        title: const Text('Todo App'),
+        title: const Text('SnapNote'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
